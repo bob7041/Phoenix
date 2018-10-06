@@ -84,6 +84,8 @@ public class Service
 	/**
 	 * Enter text passed in as a param to the field specified by the UIMap Locator
 	 * 
+	 * Note that the text to enter is hardcoded and not stored in UIMap...
+	 * 
 	 * @param mapLocator key (bylocator|fieldlocator)
 	 * @param text to enter
 	 */
@@ -101,6 +103,15 @@ public class Service
 			
 			myWebDriver.findElement (By.id (myLocator [1])).sendKeys (enterMe);
 		}
+	}
+	
+	public void enterReturn (String mapLocatorKey)
+	{
+		String myMapLocator = myDatabase.getStringUIMapData (mapLocatorKey);
+		String [] myLocator = myMapLocator.split ("\\|");  // split bylocator and fieldlocator
+		
+		if (myLocator [0].equals ("id"))
+			myWebDriver.findElement (By.id (myLocator [1])).sendKeys (Keys.ENTER);
 	}
 	
 	/**
@@ -131,7 +142,13 @@ public class Service
 		String menuLocator = myDatabase.getStringUIMapData (mapMenuLocatorKey);
 		String [] menuLocatorSplit = menuLocator.split ("\\|");
 		
-		WebElement myMenu = myWebDriver.findElement (By.id (menuLocatorSplit [1]));
+		WebElement myMenu = null;
+		
+		if (menuLocatorSplit [0].equals ("id"))
+			myMenu = myWebDriver.findElement (By.id (menuLocatorSplit [1]));
+		else if (menuLocatorSplit [0].equals ("class"))
+			myMenu = myWebDriver.findElement (By.className (menuLocatorSplit [1]));
+		
 		myMenu.click ();
 	}
 	
@@ -278,7 +295,10 @@ public class Service
 		// make this more generic - check myLocator [0] and use different "By" locators 
 		
 		WebDriverWait wait = new WebDriverWait (myWebDriver, 15);
-		wait.until (ExpectedConditions.visibilityOfElementLocated (By.id (myLocator [1]))); 
+		if (myLocator [0].equals ("id"))
+			wait.until (ExpectedConditions.visibilityOfElementLocated (By.id (myLocator [1]))); 
+		else if (myLocator [0].equals ("class"))
+			wait.until (ExpectedConditions.visibilityOfElementLocated (By.className (myLocator [1])));
 	}
 	
 	// I sometimes see errors like this: "Element <element> is not clickable at point <x> because another

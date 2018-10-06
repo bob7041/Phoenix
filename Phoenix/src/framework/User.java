@@ -31,6 +31,7 @@ public class User
 	private Config   myConfig = null;
 	private Database myDatabase = null;
 	private Browser  myBrowser = null;
+	private Oracle   myOracle = null;
 	private Login    myLogin = null;
 	private Defects  myDefects = null;
 	public  TestDataRow myNextRow = null;
@@ -69,11 +70,12 @@ public class User
 		
 		myDatabase = new Database (myConfig);
 		myBrowser  = new Browser (myConfig);
+		myOracle   = new Oracle (myConfig);
 		
 		// Create services
 		myLogin = new Login (myConfig, myDatabase, myBrowser);
 		
-		myDefects = new Defects (myConfig, myDatabase, myBrowser);
+		myDefects = new Defects (myConfig, myDatabase, myBrowser, myOracle);
 		myNextRow = new TestDataRow ();
 	}
 		
@@ -94,6 +96,8 @@ public class User
 	public void runTest ()
 	{
 		System.out.println ("Running Test");
+		//myDefects.navigateToSearchPage ();
+		
 		
 		// read in test data from TestData table and perform the appropriate
 		// action (add, update, or delete a defect). Note that we are passing

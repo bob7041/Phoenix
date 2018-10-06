@@ -1,6 +1,8 @@
 package framework;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 /* Copyright (C) 2018  Bob Brander
 
@@ -34,6 +36,7 @@ import org.openqa.selenium.WebDriver;
  */
 public class Defects extends Service
 {
+	Oracle myOracle = null;
 	WebDriver wdd = null;
 	
 	/**
@@ -44,10 +47,11 @@ public class Defects extends Service
 	 * @param browser object
 	 * 
 	 */
-	public Defects (Config config, Database database, Browser browser)
+	public Defects (Config config, Database database, Browser browser, Oracle oracle)
 	{
 		super (config, database, browser);
 		wdd = browser.getmyWebDriver ();
+		myOracle = oracle;
 	}
 	
 	// ----- high-level services -----
@@ -124,7 +128,13 @@ public class Defects extends Service
 		clickLink ("CreateDialogSubmitButton");
 		
 		// insert test results
-		myDatabase.insertTestResults (myConfig.getStringProperty ("JiraUser"), myConfig.getStringProperty ("testset"), next.TestRecordID, myConfig.getStringProperty ("JiraServerName"), next.TestResult);
+		String status = null;
+		if (myOracle.verifyDefectInsert (next.Summary))
+			status = "Pass";
+		else
+			status = "Fail";
+			
+		myDatabase.insertTestResults (myConfig.getStringProperty ("JiraUser"), myConfig.getStringProperty ("testset"), next.TestRecordID, myConfig.getStringProperty ("JiraServerName"), status);
 	}
 	
 	public void updateDefect (TestDataRow next)
@@ -135,5 +145,33 @@ public class Defects extends Service
 	public void deleteDefect (TestDataRow next)
 	{
 		System.out.println ("delete defect " + next.Summary);
+	}
+	
+	public void navigateToSearchPage ()
+	{
+		// go to Issues -> Current Search
+		selectMenu ("HomepageIssuesMenu");
+		selectMenuItem ("SearchCurrentsearch");
+		waitForElement ("SearchOrderby");
+		
+		// Order by "Created"
+		selectMenu ("SearchOrderby");
+		Utils.waitaFewSeconds(5);
+		enterText ("SearchCreator", "Created");
+		Utils.waitaFewSeconds(1);
+		enterReturn ("SearchCreator");
+		Utils.waitaFewSeconds(5);
+		clickLink ("SearchChangeOrderby");
+		Utils.waitaFewSeconds(5);
+	}
+	
+	public void refreshSearchPage ()
+	{
+		
+	}
+	
+	public String getLatestDefectKey ()
+	{
+		return ("Dummy");
 	}
 }
